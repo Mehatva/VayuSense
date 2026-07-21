@@ -1,0 +1,218 @@
+/* ═══════════════════════════════════════════════════════════════════
+   VayuSense — Enterprise Minimalist Design System
+   Architecture: Senior/Staff level. Strict variables, responsive, 
+                 highly constrained palette, no gimmicks.
+═══════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import 'leaflet/dist/leaflet.css';
+
+:root {
+  /* Strictly constrained Grayscale (Tailwind slate scale) */
+  --slate-50:  #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  /* Semantic Colors */
+  --bg-page: var(--slate-50);
+  --bg-panel: #ffffff;
+  
+  --text-primary: var(--slate-900);
+  --text-secondary: var(--slate-500);
+  --text-tertiary: var(--slate-400);
+
+  --border-subtle: var(--slate-200);
+  --border-strong: var(--slate-300);
+
+  /* Functional AQI Colors (WCAG compliant contrast against white) */
+  --aqi-good: #059669;         /* Emerald 600 */
+  --aqi-satisfactory: #65a30d; /* Lime 600 */
+  --aqi-moderate: #d97706;     /* Amber 600 */
+  --aqi-poor: #dc2626;         /* Red 600 */
+  --aqi-very-poor: #b91c1c;    /* Red 700 */
+  --aqi-severe: #7c3aed;       /* Violet 600 */
+
+  /* System Geometry */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  
+  /* System Shadows (Subtle, realistic elevation) */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+
+  /* Fonts */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ── Base Reset & Typography ────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+body { background-color: var(--bg-page); color: var(--text-primary); font-size: 14px; line-height: 1.5; }
+
+h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.02em; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ── Layout Engine ──────────────────────────────────────────────── */
+.layout-wrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 40px 64px 40px;
+}
+
+.layout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 32px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+}
+
+/* ── Responsive Dashboard Grid ──────────────────────────────────── */
+/* Replaces rigid 4-col bento with a fluid responsive grid */
+.dashboard-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr; /* Default mobile */
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(100px, auto);
+  }
+}
+
+/* Grid Cell Placements (Desktop) */
+.grid-map         { grid-column: span 12 / span 12; min-height: 400px; }
+@media (min-width: 1024px) {
+  .grid-map       { grid-column: span 8 / span 8; grid-row: span 3; }
+  .grid-aqi       { grid-column: span 4 / span 4; grid-row: span 2; }
+  .grid-eco       { grid-column: span 4 / span 4; grid-row: span 1; }
+  .grid-forecast  { grid-column: span 6 / span 6; grid-row: span 2; }
+  .grid-advisory  { grid-column: span 6 / span 6; grid-row: span 2; }
+  .grid-attr      { grid-column: span 6 / span 6; grid-row: span 2; }
+  .grid-enf       { grid-column: span 6 / span 6; grid-row: span 2; }
+}
+
+/* ── Component Primitives ───────────────────────────────────────── */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* ── UI Controls ────────────────────────────────────────────────── */
+.control-group {
+  display: flex;
+  gap: 8px;
+  background: var(--slate-100);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.btn-segment {
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+
+.btn-segment.active {
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary {
+  background: var(--slate-900);
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: opacity 0.2s;
+}
+.btn-primary:hover { opacity: 0.9; }
+
+/* ── Typography Utilities ───────────────────────────────────────── */
+.metric-value { font-size: 48px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
+.metric-label { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+
+.aqi-good { color: var(--aqi-good); }
+.aqi-satisfactory { color: var(--aqi-satisfactory); }
+.aqi-moderate { color: var(--aqi-moderate); }
+.aqi-poor { color: var(--aqi-poor); }
+.aqi-very-poor { color: var(--aqi-very-poor); }
+.aqi-severe { color: var(--aqi-severe); }
+
+/* ── Map Overrides (Clean Light) ────────────────────────────────── */
+.leaflet-container { 
+  font-family: var(--font-sans) !important; 
+  background: var(--slate-50) !important;
+  border-radius: var(--radius-lg); 
+}
+.leaflet-popup-content-wrapper {
+  background: var(--bg-panel) !important; 
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-subtle) !important; 
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-lg) !important; 
+  padding: 0 !important;
+}
+.leaflet-popup-tip { 
+  background: var(--bg-panel) !important; 
+  border-top: 1px solid var(--border-subtle); 
+  border-left: 1px solid var(--border-subtle); 
+}
+
+/* ── Utilities ──────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
