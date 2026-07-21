@@ -1,0 +1,18 @@
+# Node / React Frontend
+node_modules/
+dist/
+.env.local
+.DS_Store
+
+# Python Backend
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.pytest_cache/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
