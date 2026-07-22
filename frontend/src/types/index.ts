@@ -20,10 +20,23 @@ export interface ForecastData {
 }
 
 export interface EnforcementTarget {
-  id: string;
-  name: string;
-  type: string;
-  violation_score: number;
-  lat: number;
-  lon: number;
+  id: string
+  ward: string
+  lat: number
+  lon: number
+  violation_type: string
+  confidence_score: number
+  severity: 'high' | 'medium' | 'low'
+  est_emissions_kg_hr: number
+  status: 'active' | 'investigating' | 'resolved'
+}
+
+export interface IoTEvent {
+  id: string
+  ward: string
+  timestamp: string
+  metric: string
+  delta: string
+  severity: 'high' | 'medium'
+  cause: string
 }

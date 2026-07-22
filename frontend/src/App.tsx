@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Wind, MapPin } from 'lucide-react'
+import { Wind, MapPin, Activity } from 'lucide-react'
 import { useVayuData } from './hooks/useVayuData'
 import CityMap from './components/CityMap'
 import AttributionPanel from './components/AttributionPanel'
@@ -33,11 +33,11 @@ export default function App() {
   const [selectedWard, setSelectedWard] = useState('Dwarka')
   const [forecastHour, setForecastHour] = useState(0)
 
-  // Use the new custom hook
   const {
     attribution,
     forecast,
     enforcement,
+    iotEvents,
     loading,
     API,
     currentAQI
@@ -95,6 +95,35 @@ export default function App() {
             />
             <span style={{ fontSize: 12, fontWeight: 500 }}>+72h</span>
           </div>
+
+          {/* IoT Sensor Live Feed Overlay */}
+          <div style={{
+            position: 'absolute', top: 24, right: 24, zIndex: 1000,
+            width: '280px', display: 'flex', flexDirection: 'column', gap: '8px'
+          }}>
+            {iotEvents.map((evt, idx) => (
+              <div key={evt.id} style={{
+                background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)',
+                borderLeft: `3px solid ${evt.severity === 'high' ? 'var(--aqi-very-poor)' : 'var(--aqi-poor)'}`,
+                padding: '12px', borderRadius: '4px', boxShadow: 'var(--shadow-md)',
+                animation: 'slideIn 0.3s ease-out forwards',
+                opacity: 1 - (idx * 0.25)
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{evt.ward.toUpperCase()}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>Just now</span>
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Activity size={12} color={evt.severity === 'high' ? 'var(--aqi-very-poor)' : 'var(--aqi-poor)'} />
+                  {evt.metric} Spike: {evt.delta}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: '2px' }}>
+                  {evt.cause}
+                </div>
+              </div>
+            ))}
+          </div>
+
         </div>
 
         {/* AQI Summary Panel */}

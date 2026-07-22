@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import axios from 'axios'
-import type { LiveAQIData, WardAttribution, ForecastData, EnforcementTarget } from '../types'
+import type { LiveAQIData, WardAttribution, ForecastData, EnforcementTarget, IoTEvent } from '../types'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const WS_URL = API.replace('http', 'ws')
 
 export function useVayuData(city: string, selectedWard: string) {
   const [liveData, setLiveData] = useState<LiveAQIData | null>(null)
@@ -11,6 +12,10 @@ export function useVayuData(city: string, selectedWard: string) {
   const [enforcement, setEnforcement] = useState<EnforcementTarget[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
+  
+  // IoT Events Stream
+  const [iotEvents, setIotEvents] = useState<IoTEvent[]>([])
+  const ws = useRef<WebSocket | null>(null)
 
   const fetchGlobalData = useCallback(async () => {
     try {
@@ -24,7 +29,6 @@ export function useVayuData(city: string, selectedWard: string) {
       setError(null)
     } catch (err) {
       if (err instanceof Error) setError(err)
-      // Fallbacks can be added here if needed, but error states are preferred
     } finally {
       setLoading(false)
     }
@@ -39,30 +43,51 @@ export function useVayuData(city: string, selectedWard: string) {
       setAttribution(attrRes.data)
       setForecast(fcstRes.data)
     } catch (err) {
-      // Quiet fail for ward data to avoid breaking layout
+      // Quiet fail
     }
   }, [city, selectedWard])
 
-  // Initial fetch and polling
+  // HTTP Polling
   useEffect(() => {
     fetchGlobalData()
-    const iv = setInterval(fetchGlobalData, 5 * 60 * 1000) // 5 min polling
+    const iv = setInterval(fetchGlobalData, 5 * 60 * 1000)
     return () => clearInterval(iv)
   }, [fetchGlobalData])
 
-  // Ward data fetch
   useEffect(() => {
     fetchWardData()
   }, [fetchWardData])
+
+  // WebSocket Live Stream Connection
+  useEffect(() => {
+    ws.current = new WebSocket(`${WS_URL}/ws/live-updates?city=${city}`)
+    
+    ws.current.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data)
+        if (payload.type === 'iot_spike') {
+          // Prepend new event and keep last 5
+          setIotEvents(prev => [payload.data, ...prev].slice(0, 5))
+        }
+      } catch (err) {
+        console.error("WebSocket message parse error", err)
+      }
+    }
+
+    return () => {
+      ws.current?.close()
+    }
+  }, [city])
 
   return {
     liveData,
     attribution,
     forecast,
     enforcement,
+    iotEvents,
     loading,
     error,
     API,
-    currentAQI: liveData?.city_avg_aqi || 265 // Safe fallback for UI rendering
+    currentAQI: liveData?.city_avg_aqi || 265
   }
 }
