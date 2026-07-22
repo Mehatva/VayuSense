@@ -40,3 +40,18 @@ export interface IoTEvent {
   severity: 'high' | 'medium'
   cause: string
 }
+
+export interface Scenario {
+  id: string
+  label: string
+  description: string
+}
+
+export interface SimulationResult {
+  ward: string
+  baseline_aqi: number
+  intervention_aqi: number
+  aqi_improvement: number
+  improvement_pct: number
+  category_before: string
+}

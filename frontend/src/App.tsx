@@ -7,6 +7,7 @@ import ForecastChart from './components/ForecastChart'
 import EnforcementPanel from './components/EnforcementPanel'
 import EconomicCounter from './components/EconomicCounter'
 import CitizenAdvisory from './components/CitizenAdvisory'
+import PolicySimulator from './components/PolicySimulator'
 
 const CITIES = ['Delhi', 'Mumbai', 'Bengaluru']
 
@@ -162,6 +163,11 @@ export default function App() {
         {/* Advisory Gen Panel */}
         <div className="panel grid-advisory">
            <CitizenAdvisory ward={selectedWard} />
+        </div>
+
+        {/* Causal Policy Simulator */}
+        <div className="panel grid-sim">
+           <PolicySimulator city={city} />
         </div>
 
       </main>
